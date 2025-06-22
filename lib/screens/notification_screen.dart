@@ -1,4 +1,6 @@
+import 'package:fishpond/providers/notification.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class NotificationScreen extends StatefulWidget {
    const NotificationScreen({super.key});
@@ -8,58 +10,54 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-   List<String> names = ['Alice', 'Bob', 'Charlie'];
+  late List notifications = [];
+  bool isLoading = true;
 
+  getNotification() async {
+    await Provider
+        .of<NotificationProvider>(context, listen: false)
+        .getNotification();
+    setState(() {
+      notifications = Provider
+          .of<NotificationProvider>(context, listen: false)
+          .getNotifications;
+      isLoading = false;
+    });
+  }
 
+  @override
+  void initState() {
+    super.initState();
+    getNotification();
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> nameWidgets = names.map((name) {
-      return Column(
-        children: [
-          NotificationCard(),
-          SizedBox(height: 6,)
-        ],
-      );
-    }).toList();
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-    return Container(
-      padding: const EdgeInsets.only(left: 20, right: 20, top: 35),
-      child: Column(
-        children: [
-          const SizedBox(
-            height: 20,
-          ),
-          Center(
-            child: Text("Notifications"),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text("New"),
-              SizedBox(height: 10,),
-              Column(
-                children: nameWidgets,
-              ),
-              Text("Previous Notification"),
-              SizedBox(height: 10,),
-              NotificationCard(),
-              SizedBox(height: 5,),
-              NotificationCard()
-            ],
-          )
-        ],
-      ),
-    );
+    if (notifications.isNotEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 16.0, right: 16, top: 24),
+        child: ListView.builder(
+          itemCount: notifications.length,
+          itemBuilder: (context, index) {
+            final notification = notifications[index];
+            return NotificationCard(notification: notification,); // Pass data to card
+          },
+        ),
+      );
+    } else {
+      return const Center(child: Text("Notification feed is empty"));
+    }
   }
 }
 
 
 class NotificationCard extends StatelessWidget {
-  const NotificationCard({super.key});
+  final Map<String, dynamic> notification;
+  const NotificationCard({super.key, required this.notification});
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +85,7 @@ class NotificationCard extends StatelessWidget {
           SizedBox(width: 10,),
           Expanded(
             child: Text(
-              "The water in pond A has exceeded threshold,\n Current Temperature: 41 C",
+              '',
               softWrap: true,
             ),
           )

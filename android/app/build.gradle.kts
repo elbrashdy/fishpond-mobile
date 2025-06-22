@@ -1,8 +1,11 @@
+// android/app/build.gradle.kts
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     id("com.android.application")
-    id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id("dev.flutter.flutter-gradle-plugin")
+    id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")      // ✅ must be AFTER Android/Kotlin plugins
+    id("dev.flutter.flutter-gradle-plugin")   // Flutter plugin always last
 }
 
 android {
@@ -10,20 +13,8 @@ android {
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
-    }
-
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.fishpond"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        applicationId = "com.example.fyp" // ← change if you’ve added a custom package name in Firebase
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -32,13 +23,32 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // TODO: create a real signingConfig before publishing
             signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = false
+            isShrinkResources = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+
+    }
+    kotlinOptions { jvmTarget = "11" }
 }
 
-flutter {
-    source = "../.."
+flutter { source = "../.." }
+
+// ----------------------------------------------------------------------------
+// 🔑  Dependencies
+// ----------------------------------------------------------------------------
+dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:33.1.0")) // keep up‑to‑date
+    implementation("com.google.firebase:firebase-messaging")            // push notifications
+    // Add other Firebase libs here if needed (auth, firestore, etc.)
 }

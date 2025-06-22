@@ -1,3 +1,4 @@
+import 'package:fishpond/screens/monitor.dart';
 import 'package:flutter/material.dart';
 
 class LandingScreen extends StatelessWidget {
@@ -13,7 +14,7 @@ class LandingScreen extends StatelessWidget {
             height: 20,
           ),
           Center(
-            child: Text("Landing"),
+            child: MonitoringDashboard(),
           ),
           const SizedBox(
             height: 20,

@@ -1,8 +1,18 @@
+import 'dart:convert';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:fishpond/providers/notification.dart';
 import 'package:fishpond/screens/history_screen.dart';
 import 'package:fishpond/screens/landing_screen.dart';
+import 'package:fishpond/screens/monitor.dart';
 import 'package:fishpond/screens/notification_screen.dart';
 import 'package:fishpond/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+
+import '../main.dart';
+
 
 class HomeScreen extends StatefulWidget {
 
@@ -14,10 +24,46 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
+  String? fcmToken = '';
+  String notificationMessage = 'Waiting for alert...';
+
+  @override
+  void initState() {
+    super.initState();
+    setupFCM();
+  }
+
+  Future<void> setupFCM() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    // Request permission on iOS
+    await messaging.requestPermission();
+
+    // Get FCM token
+    fcmToken = await messaging.getToken();
+
+    Provider.of<NotificationProvider>(context, listen: false).submitNotificationToken(fcmToken!).then(
+        (onValue) => {}
+    );
+
+    // Listen to foreground messages
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print("📩 Foreground notification received!");
+      if (message.notification != null) {
+        setState(() {
+          notificationMessage = message.notification!.body ?? 'New Alert!';
+        });
+      }
+    });
+  }
+
+
+
   int _selectedIndex = 0;
 
   final List<Widget> pages = [
-    const LandingScreen(),
+    const MonitoringDashboard(),
     const HistoryScreen(),
     const NotificationScreen(),
     const ProfileScreen()
@@ -51,3 +97,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+

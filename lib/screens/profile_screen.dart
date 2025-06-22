@@ -1,5 +1,8 @@
+import 'package:fishpond/providers/auth.dart';
+import 'package:fishpond/screens/auth/login_screen.dart';
 import 'package:fishpond/widgets/row.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../misc/app_theme.dart';
 import '../misc/colors.dart';
 import '../widgets/profile_card.dart';
@@ -15,9 +18,6 @@ class ProfileScreen extends StatelessWidget {
             children: [
               const SizedBox(
                 height: 20,
-              ),
-              Center(
-                child: Text("Profile"),
               ),
               const SizedBox(
                 height: 20,
@@ -52,7 +52,13 @@ class ProfileScreen extends StatelessWidget {
               ),
               RowWidget(widgetList: [
                 TextButton(
-                    onPressed: () {},
+                    onPressed: () => Provider.of<AuthProvider>(context, listen: false).logout().then(
+                        (value) {
+                          if(value) {
+                            Navigator.pushReplacementNamed(context, LoginScreen.routeName);
+                          }
+                        }
+                    ),
                     child: Text(
                       'Logout',
                       style: AppTheme.lightTextTheme.headlineMedium,

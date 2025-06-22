@@ -69,12 +69,12 @@ class AppTheme {
         backgroundColor: AppColor.mainColor,
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        foregroundColor: Colors.white,
+        foregroundColor: Colors.blueGrey,
         backgroundColor: AppColor.mainColor,
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
 
-        selectedItemColor: AppColor.mainColor,
+        selectedItemColor: Colors.blueGrey,
       ),
       textTheme: lightTextTheme,
       canvasColor: Color(0xFF1A2D66),
