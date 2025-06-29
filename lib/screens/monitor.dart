@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-
+import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
+import '../providers/reading.dart';
 
 class MonitoringDashboard extends StatefulWidget {
   const MonitoringDashboard({super.key});
@@ -13,6 +14,8 @@ class MonitoringDashboard extends StatefulWidget {
 
 class _MonitoringDashboardState extends State<MonitoringDashboard> {
   final PusherChannelsFlutter _pusher = PusherChannelsFlutter.getInstance();
+
+
 
   String temperature = '--';
   String ph = '--';
@@ -30,16 +33,15 @@ class _MonitoringDashboardState extends State<MonitoringDashboard> {
         apiKey: '9a7cf274e517a02dcedb',
         cluster: 'ap2',
         onConnectionStateChange: (currentState, previousState) {
-          print("Connection: $previousState → $currentState");
+          // For development
+          // print("Connection: $previousState → $currentState");
         },
         onError: (message, code, exception) {
-          print("Pusher error: $message ($code): $exception");
+          // for development
+          // print("Pusher error: $message ($code): $exception");
         },
         onEvent: (event) {
-          print("Received event: ${event.eventName}");
-          print("Data: ${event.data}");
 
-          // Parse the nested data from Laravel
           try {
             final decoded = jsonDecode(event.data ?? '{}');
             final reading = decoded['reading'];
@@ -47,12 +49,32 @@ class _MonitoringDashboardState extends State<MonitoringDashboard> {
             if (reading != null) {
               setState(() {
                 temperature = reading['temperature'].toString();
-                ph = reading['ph_value'].toString();
-                ph_value = reading['ph_value'];
+
+                final phRaw = reading['ph_value'];
+                double parsedPh = 0.0;
+
+                if (phRaw is int) {
+                  parsedPh = phRaw.toDouble();
+                } else if (phRaw is double) {
+                  parsedPh = phRaw;
+                } else if (phRaw is String) {
+                  parsedPh = double.tryParse(phRaw) ?? 0.0;
+                }
+
+                ph_value = parsedPh;
+                ph = parsedPh.toStringAsFixed(2);
+              });
+
+              final readingProvider = Provider.of<ReadingProvider>(context, listen: false);
+              readingProvider.addNewReading({
+                'temperature': reading['temperature'],
+                'ph_value': reading['ph_value'],
+                'created_at': reading['created_at'] ?? DateTime.now().toIso8601String(),
               });
             }
           } catch (e) {
-            print("Error parsing event data: $e");
+            // for development
+           // print("Error parsing event data: $e");
           }
         },
       );
@@ -60,126 +82,151 @@ class _MonitoringDashboardState extends State<MonitoringDashboard> {
       await _pusher.subscribe(channelName: 'sensor-channel');
       await _pusher.connect();
     } catch (e) {
-      print("Pusher init error: $e");
+      // for development
+      // print("Pusher init error: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Home Page", style: TextStyle(fontWeight: FontWeight.bold))),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Card(
-              elevation: 6,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Column(
-                      children: [
-                        const Icon(Icons.wb_sunny, size: 32, color: Colors.orange),
-                        Text(temperature, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                        const Text("Temperature"),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            SizedBox(
-                              width: 60,
-                              height: 60,
-                              child: CircularProgressIndicator(
-                                value: ph_value / 14,
-                                strokeWidth: 6,
-                                backgroundColor: Colors.grey[300],
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                              ),
+    final readings = Provider.of<ReadingProvider>(context).getReadings;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Card(
+            elevation: 6,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Column(
+                    children: [
+                      const Icon(Icons.wb_sunny, size: 32, color: Colors.orange),
+                      Text(temperature != '--'
+                          ? temperature
+                          : (readings.isNotEmpty ? readings.last['temperature'].toString() : '--'),
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                      const Text("Temperature"),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox(
+                            width: 60,
+                            height: 60,
+                            child: CircularProgressIndicator(
+                              value: ph_value != 0.0
+                                  ? (ph_value / 14)
+                                  : (readings.isNotEmpty ? readings.last['ph_value'] / 14 : 0.0),
+                              strokeWidth: 6,
+                              backgroundColor: Colors.grey[300],
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                             ),
-                            Text(ph, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        const Text("pH Level"),
-                      ],
-                    )
-                  ],
-                ),
+                          ),
+                          Text(ph != '--'
+                              ? ph
+                              : (readings.isNotEmpty ? readings.last['ph_value'].toString() : '--'),
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      const Text("pH Level"),
+                    ],
+                  )
+                ],
               ),
             ),
-            const SizedBox(height: 24),
-            const Text("Real-time Temperature Monitoring with Thresholds", style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 200, child: TemperatureChart()),
-            const SizedBox(height: 24),
-            const Text("Real-Time pH Level Monitoring with Thresholds", style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 200, child: PHChart()),
-          ],
-        ),
+          ),
+
+
+          const SizedBox(height: 24),
+          const Text("Real-time Temperature Monitoring with Thresholds", style: TextStyle(fontWeight: FontWeight.bold)),
+          SizedBox(height: 200, child: TemperatureChart(readings: readings,)),
+          const SizedBox(height: 24),
+          const Text("Real-Time pH Level Monitoring with Thresholds", style: TextStyle(fontWeight: FontWeight.bold)),
+          SizedBox(height: 200, child: PHChart(readings: readings,)),
+        ],
       ),
     );
   }
 }
 
-// Temperature Chart
+
 class TemperatureChart extends StatelessWidget {
-  const TemperatureChart({super.key});
+  final List readings;
+  const TemperatureChart({super.key, required this.readings});
 
   @override
   Widget build(BuildContext context) {
+    final spots = readings.asMap().entries.map<FlSpot>((entry) {
+      final i = entry.key.toDouble();
+      final temp = entry.value['temperature'].toDouble();
+      return FlSpot(i, temp);
+    }).toList();
+
     return LineChart(
       LineChartData(
-        minY: 24,
-        maxY: 30,
+        minY: 19,
+        maxY: 50,
         titlesData: FlTitlesData(show: true),
         lineBarsData: [
           LineChartBarData(
             isCurved: false,
-            spots: List.generate(30, (i) => FlSpot(i.toDouble(), 25 + (i % 6).toDouble())),
+            spots: spots,
             color: Colors.orange,
             barWidth: 2,
             dotData: FlDotData(show: true),
           ),
         ],
         extraLinesData: ExtraLinesData(horizontalLines: [
-          HorizontalLine(y: 28, color: Colors.red, dashArray: [5, 5], strokeWidth: 2),
-          HorizontalLine(y: 25, color: Colors.blue, dashArray: [5, 5], strokeWidth: 2),
+          HorizontalLine(y: 26, color: Colors.red, dashArray: [5, 5], strokeWidth: 2),
+          HorizontalLine(y: 33, color: Colors.blue, dashArray: [5, 5], strokeWidth: 2),
         ]),
       ),
     );
   }
 }
 
-// pH Chart
 class PHChart extends StatelessWidget {
-  const PHChart({super.key});
+  final List readings;
+  const PHChart({super.key, required this.readings});
 
   @override
   Widget build(BuildContext context) {
+    final spots = readings.asMap().entries.map<FlSpot>((entry) {
+      final i = entry.key.toDouble();
+      final ph = entry.value['ph_value'].toDouble();
+      return FlSpot(i, ph);
+    }).toList();
+
     return LineChart(
       LineChartData(
-        minY: 6.0,
-        maxY: 8.5,
+        minY: 4.5,
+        maxY: 12,
         titlesData: FlTitlesData(show: true),
         lineBarsData: [
           LineChartBarData(
             isCurved: false,
-            spots: List.generate(24, (i) => FlSpot(i.toDouble(), 6.5 + ((i % 5) * 0.4))),
+            spots: spots,
             color: Colors.blue,
             barWidth: 2,
             dotData: FlDotData(show: true),
           ),
         ],
         extraLinesData: ExtraLinesData(horizontalLines: [
-          HorizontalLine(y: 8.5, color: Colors.red, dashArray: [5, 5], strokeWidth: 2),
+          HorizontalLine(y: 9.3, color: Colors.red, dashArray: [5, 5], strokeWidth: 2),
           HorizontalLine(y: 6.5, color: Colors.green, dashArray: [5, 5], strokeWidth: 2),
         ]),
       ),
     );
   }
 }
+
+

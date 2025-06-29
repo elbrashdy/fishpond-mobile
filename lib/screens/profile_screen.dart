@@ -1,4 +1,5 @@
 import 'package:fishpond/providers/auth.dart';
+import 'package:fishpond/screens/auth/change_password_screen.dart';
 import 'package:fishpond/screens/auth/login_screen.dart';
 import 'package:fishpond/widgets/row.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,9 @@ class ProfileScreen extends StatelessWidget {
                 height: 20,
               ),
               ProfileScreenSeparedItem(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushReplacementNamed(context, ChangePasswordScreen.routeName);
+                  },
                   icon: Icons.lock_outline,
                   routename: '',
                   text: 'Password'),
@@ -35,17 +38,6 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(
                 height: 5,
               ),
-
-              ProfileScreenSeparedItem(
-                  onTap: () => null,
-                  icon: Icons.g_translate,
-                  text: "Language  ",
-                  routename: "routename"),
-              ProfileScreenSeparedItem(
-                  onTap: () => null,
-                  icon: Icons.help_outline,
-                  text: "Help",
-                  routename: "routename"),
 
               const SizedBox(
                 height: 10,

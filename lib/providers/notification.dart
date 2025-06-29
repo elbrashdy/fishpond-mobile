@@ -1,8 +1,6 @@
 import 'dart:convert' as convert;
-
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
-
 import '../utilities/environment.dart';
 
 class NotificationProvider with ChangeNotifier {
@@ -20,10 +18,9 @@ class NotificationProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final jsonBody = convert.jsonDecode(response.body);
-        print(jsonBody);
 
         if (jsonBody is Map && jsonBody['data'] is List) {
-          _notifications = jsonBody['data']; // ✅ Correct assignment
+          _notifications = jsonBody['data'];
         } else {
           _notifications = [];
         }
@@ -42,9 +39,6 @@ class NotificationProvider with ChangeNotifier {
     }
   }
 
-
-
-
   Future submitNotificationToken(String token) async {
     try {
       final url = Uri.parse('${API_URL}notifications/save-token');
@@ -58,7 +52,6 @@ class NotificationProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         notifyListeners();
         return true;
-      } else {
       }
       notifyListeners();
       return false;

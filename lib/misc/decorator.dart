@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-
 import 'colors.dart';
 
 class Decorator {
   static const fieldDecorator = InputDecoration(
-    // prefixIcon: Icon(Icons.email),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(8)),
     ),

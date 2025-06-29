@@ -3,6 +3,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fishpond/misc/app_theme.dart';
 import 'package:fishpond/providers/auth.dart';
 import 'package:fishpond/providers/notification.dart';
+import 'package:fishpond/providers/reading.dart';
+import 'package:fishpond/screens/auth/change_password_screen.dart';
 import 'package:fishpond/screens/auth/login_screen.dart';
 import 'package:fishpond/screens/home.dart';
 import 'package:fishpond/utilities/environment.dart';
@@ -12,7 +14,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print("🔔 Background message: ${message.notification?.title}");
 }
 
 
@@ -27,7 +28,8 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => NotificationProvider())
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => ReadingProvider())
       ],
       child: FishPond(token: token),
     )
@@ -50,9 +52,9 @@ class FishPond extends StatelessWidget {
       theme: theme,
       routes: {
         LoginScreen.routeName: (_) =>  LoginScreen(),
-        HomeScreen.routeName: (_) => const HomeScreen()
+        HomeScreen.routeName: (_) => const HomeScreen(),
+        ChangePasswordScreen.routeName: (_) => const ChangePasswordScreen()
       },
-      // home: LoginScreen(),
       home: token == null ?  LoginScreen(): const HomeScreen()
     );
   }

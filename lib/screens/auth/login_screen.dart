@@ -4,13 +4,14 @@ import 'package:fishpond/screens/home.dart';
 import 'package:fishpond/widgets/app_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../../misc/decorator.dart';
 import '../../providers/auth.dart';
 
 
 class LoginScreen extends StatefulWidget {
   static const String routeName = '/login';
+
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -100,59 +101,62 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
               ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 80,),
-                    Text("Welcome Back!", style: AppTheme.lightTextTheme.headlineMedium,),
-                    SizedBox(height: 15,),
-                    TextFormField(
-                      keyboardType: TextInputType.text,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Enter email address';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) => _username = value!,
-                      style: Decorator.fieldStyle,
-                      decoration: Decorator.fieldDecorate("Your email address").copyWith(
-                          prefixIcon: Icon(Icons.email)
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 80,),
+                      Text("Welcome Back!", style: AppTheme.lightTextTheme.headlineMedium,),
+                      SizedBox(height: 15,),
+                      TextFormField(
+                        keyboardType: TextInputType.text,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Enter email address';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) => _username = value!,
+                        style: Decorator.fieldStyle,
+                        decoration: Decorator.fieldDecorate("Your email address").copyWith(
+                            prefixIcon: Icon(Icons.email)
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 1, top: 1),
-                      child: Text(
-                        _errorMessage,
-                        style: const TextStyle(color: Colors.red),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 1, top: 1),
+                        child: Text(
+                          _errorMessage,
+                          style: const TextStyle(color: Colors.red),
+                        ),
                       ),
-                    ),
-                    TextFormField(
-                      obscureText: true,
-                      keyboardType: TextInputType.text,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Enter password';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) => _password = value!,
-                      style: Decorator.fieldStyle,
-                      decoration: Decorator.fieldDecorate("Your password").copyWith(
-                          prefixIcon: Icon(Icons.lock)
+                      TextFormField(
+                        obscureText: true,
+                        keyboardType: TextInputType.text,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Enter password';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) => _password = value!,
+                        style: Decorator.fieldStyle,
+                        decoration: Decorator.fieldDecorate("Your password").copyWith(
+                            prefixIcon: Icon(Icons.lock)
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 15,),
-                    AppButton(
-                        onTap: submitLogin,
-                        isClicked: _isLoading,
-                        name: 'Login'
-                    ),
-                  ],
-                )
+                      SizedBox(height: 15,),
+                      AppButton(
+                          onTap: submitLogin,
+                          isClicked: _isLoading,
+                          name: 'Login'
+                      ),
+                      SizedBox(height: 5,)
+                    ],
+                  )
+                ),
               ),
             ),
           ),

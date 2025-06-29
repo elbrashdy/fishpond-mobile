@@ -33,25 +33,27 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (notifications.isNotEmpty) {
-      return Padding(
-        padding: const EdgeInsets.only(left: 16.0, right: 16, top: 24),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Notifications", style: TextStyle(color: Colors.white),),
+      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : notifications.isNotEmpty
+          ? Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
         child: ListView.builder(
           itemCount: notifications.length,
           itemBuilder: (context, index) {
             final notification = notifications[index];
-            return NotificationCard(notification: notification,); // Pass data to card
+            return NotificationCard(notification: notification);
           },
         ),
-      );
-    } else {
-      return const Center(child: Text("Notification feed is empty"));
-    }
+      )
+          : const Center(child: Text("Notification feed is empty")),
+    );
   }
+
 }
 
 
