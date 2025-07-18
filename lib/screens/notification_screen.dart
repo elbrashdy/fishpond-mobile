@@ -77,20 +77,39 @@ class NotificationCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
         children: [
-          Icon(
-            Icons.warning_amber,
-            color: Colors.red,
-            size: 45,
+          Row(
+            children: [
+              Icon(
+                Icons.warning_amber,
+                color: Colors.red,
+                size: 45,
+              ),
+              SizedBox(width: 15,),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      notification['title'],
+                      softWrap: true,
+                    ),
+                    Text(
+                      notification['message'],
+                      softWrap: true,
+                    ),
+                    Text(
+                      DateTime.parse(notification['created_at']).toLocal().toString(),
+                      softWrap: true,
+                    ),
+                  ],
+                ),
+              )
+            ],
           ),
-          SizedBox(width: 10,),
-          Expanded(
-            child: Text(
-              '',
-              softWrap: true,
-            ),
-          )
+          SizedBox(height: 20,)
         ],
       ),
     );

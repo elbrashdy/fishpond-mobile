@@ -148,10 +148,10 @@ class _MonitoringDashboardState extends State<MonitoringDashboard> {
 
           const SizedBox(height: 24),
           const Text("Real-time Temperature Monitoring with Thresholds", style: TextStyle(fontWeight: FontWeight.bold)),
-          SizedBox(height: 200, child: TemperatureChart(readings: readings,)),
+          SizedBox(height: 300, child: TemperatureChart(readings: readings,)),
           const SizedBox(height: 24),
           const Text("Real-Time pH Level Monitoring with Thresholds", style: TextStyle(fontWeight: FontWeight.bold)),
-          SizedBox(height: 200, child: PHChart(readings: readings,)),
+          SizedBox(height: 300, child: PHChart(readings: readings,)),
         ],
       ),
     );
@@ -174,7 +174,7 @@ class TemperatureChart extends StatelessWidget {
     return LineChart(
       LineChartData(
         minY: 19,
-        maxY: 50,
+        maxY: 100,
         titlesData: FlTitlesData(show: true),
         lineBarsData: [
           LineChartBarData(
